@@ -46,9 +46,24 @@
  
  */
 
+// Define this to use the an alternate incremental store
+#define NSIS_TYPE "CDTIncrementalStore"
+
 #import "RecipesAppDelegate.h"
 #import "RecipeListTableViewController.h"
 #import "Recipe.h"
+
+
+#ifdef NSIS_TYPE
+// you need to fill these in
+NSString* const CDTIKey = @"ottlyetfuldoncidestistio";
+NSString* const CDTIPassword = @"enQKaTrg8dn7nkqTq3iES8mV";
+NSString* const CDTIHost = @"d04d87af-7995-42fb-958b-dba2770ad258-bluemix.cloudant.com";
+NSString* const CDTIDBName = @"cdt_recipes";
+
+#import <CDTDatastore/CDTIncrementalStore.h>
+
+#endif
 
 @interface RecipesAppDelegate ()
 
@@ -64,7 +79,11 @@
 @implementation RecipesAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
+
+#ifdef NSIS_TYPE
+    [CDTIncrementalStore initialize];
+#endif
+
     // pass down our managedObjectContext to our RecipeListTableViewController
     UITabBarController *tabBarController = (UITabBarController *)self.window.rootViewController;
     UINavigationController *navController = tabBarController.viewControllers[0];
@@ -124,6 +143,7 @@
         return _managedObjectModel;
     }
     _managedObjectModel = [NSManagedObjectModel mergedModelFromBundles:nil];
+
     return _managedObjectModel;
 }
 
@@ -144,7 +164,15 @@
     if (_persistentStoreCoordinator != nil) {
         return _persistentStoreCoordinator;
     }
-		
+
+#ifdef NSIS_TYPE
+    // We are going to allow the default database to be copied, only becuase
+    // it makes migration detection easier without knowing anything about our
+    // store object
+    BOOL migrate = NO;
+#endif
+
+
 	// copy the default store (with a pre-populated data) into our Documents folder
     //
     NSString *documentsStorePath =
@@ -155,6 +183,9 @@
 		NSString *defaultStorePath = [[NSBundle mainBundle] pathForResource:@"Recipes" ofType:@"sqlite"];
 		if (defaultStorePath) {
 			[[NSFileManager defaultManager] copyItemAtPath:defaultStorePath toPath:documentsStorePath error:NULL];
+#ifdef NSIS_TYPE
+            migrate = YES;
+#endif
 		}
 	}
 
@@ -164,6 +195,56 @@
     // add the default store to our coordinator
     NSError *error;
     NSURL *defaultStoreURL = [NSURL fileURLWithPath:documentsStorePath];
+
+#ifdef NSIS_TYPE
+
+    NSPersistentStore *theStore;
+    NSURL *storeURL = [NSURL URLWithString:CDTIDBName];
+    if (migrate) {
+        NSDictionary *opts = @{
+                               NSPersistentStoreRemoveUbiquitousMetadataOption: @YES,
+                               NSMigratePersistentStoresAutomaticallyOption: @YES,
+                               NSInferMappingModelAutomaticallyOption: @YES
+                               };
+        NSPersistentStore *fromStore = [_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+                                                                               configuration:nil
+                                                                                         URL:defaultStoreURL
+                                                                                     options:opts
+                                                                                       error:&error];
+        if (!fromStore) {
+            NSLog(@"could not get fromStore: %@", error);
+            __builtin_trap();
+        }
+        theStore = [_persistentStoreCoordinator migratePersistentStore:fromStore
+                                                                toURL:storeURL
+                                                              options:nil
+                                                             withType:@NSIS_TYPE
+                                                                error:&error];
+    } else {
+        theStore = [_persistentStoreCoordinator addPersistentStoreWithType:@NSIS_TYPE
+                                                             configuration:nil
+                                                                       URL:storeURL
+                                                                   options:nil
+                                                                     error:&error];
+    }
+    if (!theStore) {
+        NSLog(@"could not get theStore: %@", error);
+        __builtin_trap();
+    }
+
+#ifdef NSIS_REPLICATE
+    // completely untested
+
+    NSString *remote = [NSString stringWithFormat:@"https://%@:%@@%@/%@",
+                        CDTIKey, CDTIPassword, CDTIHost, CDTIDBName];
+    NSURL *remoteURL = [NSURL URLWithString:remote];
+
+    [self startReplication:[store.database createPullReplication:remoteURL]];
+    [self startReplication:[store.database createPushReplication:remoteURL]];
+#endif
+
+#else
+
    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
                                                   configuration:nil
                                                             URL:defaultStoreURL
@@ -203,8 +284,7 @@
 		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
 		abort();
     }
-		
+#endif
     return _persistentStoreCoordinator;
 }
-
 @end
