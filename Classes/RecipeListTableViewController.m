@@ -53,7 +53,8 @@
 #import "RecipeTableViewCell.h"
 
 @interface RecipeListTableViewController ()
-@property (nonatomic, strong) NSFetchedResultsController *fetchedResultsController;
+// Moved to header
+//@property (nonatomic, strong) NSFetchedResultsController *fetchedResultsController;
 @end
 
 @implementation RecipeListTableViewController
