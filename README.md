@@ -1,23 +1,21 @@
 # Recipes
-This project is a complete rip off of two projects:
 
-1. [Apple's iPhoneCoreDataRecipes][recipe]: represented by the
-initial `git` checkin.
-  * The original code can be found in branch [apple/original](6eeb628).
-  * You can read the original [ReadMe.txt](ReadMe.txt).
-2. [Couchbase Labs][cblabs]: did all the "hard work" in this
-   [git repo][cblite] to identify locations that needed changes.
+This project is a complete rip off of
+[Apple's iPhoneCoreDataRecipes][recipe] sample application.  The
+original is the initial `git` checkin and can also be found in branch
+[apple/original](6eeb628). You can read the original [ReadMe.txt](ReadMe.txt).
 
-All changes are in
-[Classes/RecipesAppDelegate.m](Classes/RecipesAppDelegate.m) the
-line changes are denoted by the macro `NSIS_TYPE`, example:
-```c
-#ifdef NSIS_TYPE
-// code
-#endif
-```
-You can also use the git history to learn more about how things
-changed.
+## Summary of changes:
+
+You can see all the changes by diffing agains `apple/original`.  The
+chainges are confined to a few files:
+- [Classes/RecipesAppDelegate.m](Classes/RecipesAppDelegate.m)
+  - changes are denoted by `#ifdef NSIS_TYPE`
+- [Classes/RecipeTableViewCell.h](Classes/RecipeTableViewCell.h) and [Classes/RecipeTableViewCell.m](Classes/RecipeTableViewCell.m)
+  - simply to to make a private propery external
+- [Classes/SyncTableViewController.h](Classes/SyncTableViewController.h) and [Classes/SyncTableViewController.m](Classes/SyncTableViewController.m)
+  - New files that implements the Sync control tab
+  - This also required changes to the project files, storyboard and assets
 
 # Getting Started
 
@@ -50,13 +48,14 @@ $ git clone git@git.ibmbaas.com:jimix/cdtdatastore.git CDTDatastore
 Description of the branches:
 1. [iPhoneCoreDataRecipes](/jimix/iphonecoredatarecipes)
   1. `apple/original`: Original source from Apple ZIP file
-  1. `master`: Which should be stable. *You want to be on this one.*
+  1. `master`: Which should be stable. ***You want to be on this
+     one.***
   1. `jimix/CDTIncrementalStore`: My development branch with newer
       function.
 1. [CDTDatastore](/jimix/cdtdatastore.git)
   1. `master`: tracks original [CDTDatastore][] `master`
-  1. `CDTIncrementalStore`: "stable" version of work. *You want to be
-     on this one.*
+  1. `CDTIncrementalStore`: "stable" version of work. ***You want to
+     be on this one***.
   1. `jimix/CDTIncrementalStore`: My development branch with newer
       function.
 
@@ -98,14 +97,13 @@ more!
 <!--- references -->
 
 [recipe]: https://developer.apple.com/library/ios/samplecode/iPhoneCoreDataRecipes/Introduction/Intro.html "iPhoneCoreDataRecipes"
-[cblabs]: http://labs.couchbase.com "Couchbase Labs"
-[cblite]: https://github.com/couchbaselabs/cblite-coredata-sample-ios "Couchbase Lite Core Data Sample App"
 [cocoapods]: http://cocoapods.org "CocoaPods"
 [debugmagic]: https://developer.apple.com/library/mac/technotes/tn2124/_index.html "Mac OS X Debugging Magic"
 [nshipster]: http://nshipster.com/launch-arguments-and-environment-variables/ "Launch Arguments & Environment Variables"
 [ibmbaas]: https://git.ibmbaas.com "ARL Git Lab"
 [cdtdatastore]: https://github.com/cloudant/CDTDatastore "CDTDatastore on Github"
-<!--  LocalWords:  iPhoneCoreDataRecipes checkin Couchbase cblabs ARL
+
+<!--  LocalWords:  iPhoneCoreDataRecipes checkin ARL
  -->
 <!--  LocalWords:  repo NSIS ifdef endif CocoaPods sudo cocoapods
  -->
