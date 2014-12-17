@@ -98,6 +98,8 @@ typedef NS_ENUM(NSInteger, SyncServer) {
 {
     // This is heavy handed, but it works
     RecipeListTableViewController *rltvc = [self getRecipeListViewController];
+    [NSFetchedResultsController deleteCacheWithName:nil];
+    rltvc.fetchedResultsController = nil;
     [rltvc viewDidLoad];
 }
 
@@ -218,8 +220,8 @@ typedef NS_ENUM(NSInteger, SyncServer) {
 
     NSError *err = nil;
 
-    RecipeListTableViewController *recipeListVC = [self getRecipeListViewController];
-    NSManagedObjectContext *moc = recipeListVC.managedObjectContext;
+    RecipeListTableViewController *rlvc = [self getRecipeListViewController];
+    NSManagedObjectContext *moc = rlvc.managedObjectContext;
 
     // copy the default store (with a pre-populated data) into our Documents folder
     NSString *cannedSQLPath = [[NSBundle mainBundle] pathForResource:@"Recipes" ofType:@"sqlite"];
@@ -232,10 +234,6 @@ typedef NS_ENUM(NSInteger, SyncServer) {
         return;
     }
 
-    moc = [NSManagedObjectContext new];
-    [moc setPersistentStoreCoordinator:psc];
-    recipeListVC.managedObjectContext = moc;
-
     // remove all the current stores
     for (NSPersistentStore *ps in psc.persistentStores) {
         if (![psc removePersistentStore:ps error:&err]) {
@@ -243,6 +241,10 @@ typedef NS_ENUM(NSInteger, SyncServer) {
             return;
         }
     }
+
+    moc = [NSManagedObjectContext new];
+    [moc setPersistentStoreCoordinator:psc];
+    rlvc.managedObjectContext = moc;
 
     // remove the entire database directory
     NSURL *dir = [CDTIncrementalStore localDir];
@@ -270,12 +272,14 @@ typedef NS_ENUM(NSInteger, SyncServer) {
         [self reportIssue:@"could not get fromStore: %@", err];
         return;
     }
+
     NSString *type = [CDTIncrementalStore type];
     NSPersistentStore *theStore = [psc migratePersistentStore:cannedStore
                                                         toURL:storeURL
                                                       options:nil
                                                      withType:type
                                                         error:&err];
+
     if (!theStore) {
         [self reportIssue:@"could not get fromStore: %@", err];
         return;
