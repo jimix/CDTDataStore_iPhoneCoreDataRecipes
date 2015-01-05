@@ -47,6 +47,7 @@
  */
 
 @interface ImageToDataTransformer : NSValueTransformer
++ (NSString *)MIMEType;
 @end
 
 @interface Recipe : NSManagedObject
