@@ -815,7 +815,33 @@
                             </tableViewSection>
                             <tableViewSection headerTitle="Server Information" id="vij-XH-y06">
                                 <cells>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="3OX-Qz-6F8" style="IBUITableViewCellStyleDefault" id="BH9-rE-ZpD">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="goS-xD-IdS" style="IBUITableViewCellStyleDefault" id="FA3-Km-CR5" userLabel="DB Name">
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="FA3-Km-CR5" id="OVT-YR-5Se">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="DB Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="goS-xD-IdS">
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="j0z-iV-Svq">
+                                                    <rect key="frame" x="111" y="7" width="194" height="30"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="194" id="OFW-Bu-2s2"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                    <textInputTraits key="textInputTraits"/>
+                                                </textField>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="j0z-iV-Svq" firstAttribute="top" secondItem="OVT-YR-5Se" secondAttribute="topMargin" constant="-1" id="Wbc-W3-raZ"/>
+                                                <constraint firstItem="j0z-iV-Svq" firstAttribute="trailing" secondItem="goS-xD-IdS" secondAttribute="trailing" id="rao-3D-we3"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="3OX-Qz-6F8" style="IBUITableViewCellStyleDefault" id="BH9-rE-ZpD" userLabel="User/Key">
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="BH9-rE-ZpD" id="5Z4-h9-Gt5">
                                             <autoresizingMask key="autoresizingMask"/>
@@ -841,7 +867,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
-                                    <tableViewCell tag="1" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="Bhe-mH-tF5" style="IBUITableViewCellStyleDefault" id="a68-HX-Rkr">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="Bhe-mH-tF5" style="IBUITableViewCellStyleDefault" id="a68-HX-Rkr" userLabel="Password">
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="a68-HX-Rkr" id="mMk-yl-h2Q">
                                             <autoresizingMask key="autoresizingMask"/>
@@ -867,7 +893,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
-                                    <tableViewCell tag="2" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="Nls-2s-b2b" style="IBUITableViewCellStyleDefault" id="8jV-2i-A5E">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="Nls-2s-b2b" style="IBUITableViewCellStyleDefault" id="8jV-2i-A5E" userLabel="Hostname">
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="8jV-2i-A5E" id="uwS-mf-Dis">
                                             <autoresizingMask key="autoresizingMask"/>
@@ -893,7 +919,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
-                                    <tableViewCell tag="3" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="aiK-Yn-eeM" detailTextLabel="5RP-9k-g3A" style="IBUITableViewCellStyleSubtitle" id="Xb7-aG-Boa">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" textLabel="aiK-Yn-eeM" detailTextLabel="5RP-9k-g3A" style="IBUITableViewCellStyleSubtitle" id="Xb7-aG-Boa" userLabel="Check">
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Xb7-aG-Boa" id="bju-51-KPC">
                                             <autoresizingMask key="autoresizingMask"/>
@@ -929,6 +955,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="dbnameTF" destination="j0z-iV-Svq" id="l5V-nY-1mK"/>
                         <outlet property="hostnameTF" destination="ztD-T9-egD" id="gZt-Us-Qdp"/>
                         <outlet property="passwordTF" destination="gRO-k6-QsE" id="LI0-U5-osG"/>
                         <outlet property="progress" destination="Vg4-EW-h3F" id="WMx-ZR-9PH"/>
@@ -942,6 +969,7 @@
                         <outletCollection property="serverInfo" destination="BH9-rE-ZpD" id="YQR-Ja-cAK"/>
                         <outletCollection property="serverInfo" destination="a68-HX-Rkr" id="tC3-yY-PHs"/>
                         <outletCollection property="serverInfo" destination="8jV-2i-A5E" id="55f-J4-7uy"/>
+                        <outletCollection property="serverInfo" destination="FA3-Km-CR5" id="88C-B0-42g"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="oEg-n3-cKS" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -14,6 +14,7 @@
 @interface SyncTableViewController () <UITextFieldDelegate>
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *syncButton;
 
+@property (weak, nonatomic) IBOutlet UITextField *dbnameTF;
 @property (weak, nonatomic) IBOutlet UITextField *userTF;
 @property (weak, nonatomic) IBOutlet UITextField *passwordTF;
 @property (weak, nonatomic) IBOutlet UITextField *hostnameTF;
@@ -25,8 +26,6 @@
 
 @property (strong, nonatomic) IBOutletCollection(UITableViewCell) NSArray *options;
 @property (nonatomic) NSInteger syncSelection;
-
-@property (strong, nonatomic) NSString *databaseName;
 
 @property (weak, nonatomic) IBOutlet UIProgressView *progress;
 
@@ -50,7 +49,7 @@ typedef NS_ENUM(NSInteger, SyncSection) {
     SyncSectionStatus,
 };
 
-// These match the cell tags.  Initialize must be 0
+// These match the table position.
 typedef NS_ENUM(NSInteger, SyncOptions) {
     SyncOptionsInitialize,
     SyncOptionsSynchronize,
@@ -58,8 +57,9 @@ typedef NS_ENUM(NSInteger, SyncOptions) {
     SyncOptionsPull,
 };
 
-// These match the cell tags.
+// These match the table position.
 typedef NS_ENUM(NSInteger, SyncServer) {
+    SyncServerDBName,
     SyncServerUser,
     SyncServerPassword,
     SyncServerHostname,
@@ -256,7 +256,7 @@ typedef NS_ENUM(NSInteger, SyncServer) {
         }
     }
 
-    NSURL *storeURL = [NSURL URLWithString:self.databaseName];
+    NSURL *storeURL = [NSURL URLWithString:self.dbnameTF.text];
 
     NSDictionary *opts = @{
                            NSPersistentStoreRemoveUbiquitousMetadataOption: @YES,
@@ -442,6 +442,9 @@ typedef NS_ENUM(NSInteger, SyncServer) {
     NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
 
     switch (textField.tag) {
+        case SyncServerDBName:
+            [defs setObject:textField.text forKey:kUserSettingDBnameKey];
+            break;
         case SyncServerUser:
             [defs setObject:textField.text forKey:kUserSettingUserKey];
             break;
@@ -474,6 +477,8 @@ typedef NS_ENUM(NSInteger, SyncServer) {
 - (UITextField *)getTextFieldFromTag:(NSInteger)tag
 {
     switch (tag) {
+        case SyncServerDBName:
+            return self.dbnameTF;
         case SyncServerUser:
             return self.userTF;
         case SyncServerPassword:
@@ -494,7 +499,7 @@ typedef NS_ENUM(NSInteger, SyncServer) {
                    self.userTF.text,
                    self.passwordTF.text,
                    self.hostnameTF.text,
-                   self.databaseName];
+                   self.dbnameTF.text];
     NSURL *url = [NSURL URLWithString:s];
 
     [self checkRemoteURL:url];
@@ -529,6 +534,10 @@ typedef NS_ENUM(NSInteger, SyncServer) {
 
     NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
 
+    self.dbnameTF.text = [defs stringForKey:kUserSettingDBnameKey];
+    self.dbnameTF.tag = SyncServerDBName;
+    self.dbnameTF.delegate = self;
+
     self.hostnameTF.text = [defs stringForKey:kUserSettingHostnameKey];
     self.hostnameTF.tag = SyncServerHostname;
     self.hostnameTF.delegate = self;
@@ -543,9 +552,6 @@ typedef NS_ENUM(NSInteger, SyncServer) {
     self.passwordTF.delegate = self;
 
     self.syncSelection = [defs integerForKey:kUserSettingSyncKey];
-
-    self.databaseName = [defs stringForKey:kUserSettingDBnameKey];
-
 }
 
 - (void)viewDidLayoutSubviews
