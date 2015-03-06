@@ -41,9 +41,9 @@ $ pod setup
 A [Podfile](Podfile) exists and assumes that you are using the
 `CDTDatastore` git tree.
 
-You can obtain the correct copy using `git` from [ibmbaas][] like so:
+You can obtain the correct copy using `git` from [github][] like so:
 ```bash
-$ git clone git@git.ibmbaas.com:jimix/cdtdatastore.git CDTDatastore
+$ git clone git@github.com:jimix/CDTDatastore.git CDTDatastore
 ```
 Description of the branches:
 1. [iPhoneCoreDataRecipes](/jimix/iphonecoredatarecipes)
@@ -100,7 +100,7 @@ more!
 [cocoapods]: http://cocoapods.org "CocoaPods"
 [debugmagic]: https://developer.apple.com/library/mac/technotes/tn2124/_index.html "Mac OS X Debugging Magic"
 [nshipster]: http://nshipster.com/launch-arguments-and-environment-variables/ "Launch Arguments & Environment Variables"
-[ibmbaas]: https://git.ibmbaas.com "ARL Git Lab"
+[github]: https://github.com "GitHub"
 [cdtdatastore]: https://github.com/cloudant/CDTDatastore "CDTDatastore on Github"
 
 <!--  LocalWords:  iPhoneCoreDataRecipes checkin ARL
