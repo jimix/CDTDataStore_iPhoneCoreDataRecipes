@@ -75,7 +75,7 @@ typedef NS_ENUM(NSInteger, SyncServer) {
     UITabBarController *tabBarController = (UITabBarController *)self.tableView.window.rootViewController;
     UINavigationController *navController = tabBarController.viewControllers[0];
 
-    RecipeListTableViewController *recipeListVC = (RecipeListTableViewController *)navController.topViewController;
+    RecipeListTableViewController *recipeListVC = (RecipeListTableViewController *)[navController.viewControllers firstObject];
 
     return recipeListVC;
 }
