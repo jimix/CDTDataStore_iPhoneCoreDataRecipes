@@ -11,7 +11,7 @@
 #import "SyncTableViewController.h"
 #import "RecipeListTableViewController.h"
 
-@interface SyncTableViewController () <UITextFieldDelegate>
+@interface SyncTableViewController () <UITextFieldDelegate, CDTReplicatorDelegate>
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *syncButton;
 
 @property (weak, nonatomic) IBOutlet UITextField *dbnameTF;
@@ -30,6 +30,8 @@
 @property (weak, nonatomic) IBOutlet UIProgressView *progress;
 
 @property (strong, nonatomic) NSURL *remoteURL;
+
+@property (strong, nonatomic) CDTReplicator *strongReplicator;
 
 @end
 
@@ -197,22 +199,6 @@ typedef NS_ENUM(NSInteger, SyncServer) {
     
 }
 
-- (BOOL)syncServerLink
-{
-    if (!self.remoteURL) {
-        return NO;
-    }
-    CDTIncrementalStore *myIS = [self getIncrementalStore];
-    return [myIS linkReplicators:self.remoteURL];
-}
-
-- (void)syncServerUnlink
-{
-    CDTIncrementalStore *myIS = [self getIncrementalStore];
-    [myIS unlinkReplicators];
-}
-
-
 #pragma mark - Intitialize CoreData
 
 - (void)syncOptionInitialize
@@ -287,84 +273,122 @@ typedef NS_ENUM(NSInteger, SyncServer) {
     [self refreshRecipeListTableView];
 }
 
-- (void)commProgress:(NSString *)type
-                 end:(BOOL)end
-           processed:(NSInteger)processed
-               total:(NSInteger)total
-               error:(NSError *)error
+#pragma mark - Replication Ops
+/**
+ * Called when the replicator changes state.
+ */
+- (void)replicatorDidChangeState:(CDTReplicator *)replicator
 {
-    if (end) {
-        if (error) {
-            [self reportIssue:@"%@ Progress: %@", type, error];
-        }
-        [self.progress setProgress:1.0 animated:YES];
-        self.syncButton.enabled = YES;
-        
-        [self refreshRecipeListTableView];
-        [self syncServerUnlink];
-    } else {
-        float cent;
-        if (total == 0) {
-            cent = 1.0;
-        } else {
-            cent = (float)processed / (float)total;
-        }
-        [self.progress setProgress:cent animated:YES];
+    NSString *state;
+    switch (replicator.state) {
+        case CDTReplicatorStatePending:
+            state = @"CDTReplicatorStatePending";
+            break;
+        case CDTReplicatorStateStarted:
+            state = @"CDTReplicatorStateStarted";
+            break;
+        case CDTReplicatorStateStopped:
+            state = @"CDTReplicatorStateStopped";
+            break;
+        case CDTReplicatorStateStopping:
+            state = @"CDTReplicatorStateStopping";
+            break;
+        case CDTReplicatorStateComplete:
+            state = @"CDTReplicatorStateComplete";
+            break;
+        case CDTReplicatorStateError:
+            state = @"CDTReplicatorStateError";
+            break;
+        default:
+            state = @"unknown replicator state";
+            break;
     }
+    NSLog(@"replicator state[%@]: %@", @(replicator.state), state);
 }
+
+/**
+ * Called whenever the replicator changes progress
+ */
+- (void)replicatorDidChangeProgress:(CDTReplicator *)replicator
+{
+    float cent;
+    if (replicator.changesTotal) {
+        cent = 1.0;
+    } else {
+        cent = (float)replicator.changesProcessed / (float)replicator.changesTotal;
+    }
+
+    [self.progress setProgress:cent animated:YES];
+}
+
+/**
+ * Called when a state transition to COMPLETE or STOPPED is
+ * completed.
+ */
+- (void)replicatorDidComplete:(CDTReplicator *)replicator
+{
+    [self.progress setProgress:1.0 animated:YES];
+    self.syncButton.enabled = YES;
+    [self refreshRecipeListTableView];
+
+    self.syncButton.enabled = self.serverVerified;
+    self.strongReplicator = nil;
+}
+
+/**
+ * Called when a state transition to ERROR is completed.
+ */
+- (void)replicatorDidError:(CDTReplicator *)replicator info:(NSError *)info
+{
+    [self reportIssue:@"Replicator error: %@", info];
+    [self.progress setProgress:1.0 animated:YES];
+    self.syncButton.enabled = self.serverVerified;
+    self.strongReplicator = nil;
+}
+
 
 - (void)syncOptionsPush
 {
     NSError *err = nil;
 
-    if (![self syncServerLink]) {
-        [self reportIssue:@"could not link server"];
-        return;
-    }
-
+    self.syncButton.enabled = NO;
     [self.progress setProgress:0. animated:YES];
 
+
     CDTIncrementalStore *myIS = [self getIncrementalStore];
+    CDTISReplicator *pusherIS = [myIS replicatorThatPushesToURL:self.remoteURL withError:&err];
+    CDTReplicator *pusher = pusherIS.replicator;
 
-    self.syncButton.enabled = NO;
+    pusher.delegate = self;
 
-    __typeof(self) __weak weakSelf = self;
-    BOOL push = [myIS pushToRemote:&err
-                      withProgress:^(BOOL end, NSInteger processed, NSInteger total, NSError *e) {
-                          [weakSelf commProgress:@"push" end:end processed:processed total:total error:e];
-                      }];
-    if (!push) {
-        [self reportIssue:@"Push: %@", err];
-        self.syncButton.enabled = self.serverVerified;
-        [self syncServerUnlink];
+    if ([pusher startWithError:&err]) {
+        self.strongReplicator = pusher;
+        return;
     }
+    [self reportIssue:@"Push Failed with error: %@", err];
+    self.syncButton.enabled = self.serverVerified;
+
 }
 
 - (void)syncOptionsPull
 {
     NSError *err = nil;
 
-    if (![self syncServerLink]) {
-        [self reportIssue:@"could not link server"];
-        return;
-    }
-
+    self.syncButton.enabled = NO;
     [self.progress setProgress:0. animated:YES];
 
     CDTIncrementalStore *myIS = [self getIncrementalStore];
+    CDTISReplicator *pullerIS = [myIS replicatorThatPullsFromURL:self.remoteURL withError:&err];
+    CDTReplicator *puller = pullerIS.replicator;
 
-    self.syncButton.enabled = NO;
+    puller.delegate = self;
 
-    __typeof(self) __weak weakSelf = self;
-    BOOL pull = [myIS pullFromRemote:&err
-                      withProgress:^(BOOL end, NSInteger processed, NSInteger total, NSError *e) {
-                          [weakSelf commProgress:@"pull" end:end processed:processed total:total error:e];
-                      }];
-    if (!pull) {
-        [self reportIssue:@"Pull: %@", err];
-        self.syncButton.enabled = self.serverVerified;
-        [self syncServerUnlink];
+    if ([puller startWithError:&err]) {
+        self.strongReplicator = puller;
+        return;
     }
+    [self reportIssue:@"Pull Failed with error: %@", err];
+    self.syncButton.enabled = self.serverVerified;
 }
 
 #pragma UI Controls
