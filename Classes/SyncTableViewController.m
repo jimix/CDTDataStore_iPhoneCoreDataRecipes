@@ -232,17 +232,19 @@ typedef NS_ENUM(NSInteger, SyncServer) {
     [moc setPersistentStoreCoordinator:psc];
     rlvc.managedObjectContext = moc;
 
-    // remove the entire database directory
-    NSURL *dir = [CDTIncrementalStore localDir];
     NSFileManager *fm = [NSFileManager defaultManager];
-    if (![fm removeItemAtURL:dir error:&err]) {
+    NSURL *dir =
+    [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+
+    NSURL *storeURL = [dir URLByAppendingPathComponent:self.dbnameTF.text];
+
+    // remove the entire database directory
+    if (![fm removeItemAtURL:storeURL error:&err]) {
         if (err.code != NSFileNoSuchFileError) {
             [self reportIssue:@"removal of database directory failed: %@", err];
             return;
         }
     }
-
-    NSURL *storeURL = [NSURL URLWithString:self.dbnameTF.text];
 
     NSDictionary *opts = @{
                            NSPersistentStoreRemoveUbiquitousMetadataOption: @YES,

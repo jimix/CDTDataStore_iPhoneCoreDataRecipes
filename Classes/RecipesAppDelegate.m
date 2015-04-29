@@ -187,8 +187,11 @@ static NSString *CDTISDBName = @"recipes_test";
     NSError *error = nil;
     NSPersistentStore *theStore;
 
-    NSString *remote = CDTISDBName;
-    NSURL *storeURL = [NSURL URLWithString:remote];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSURL *dir =
+    [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+
+    NSURL *storeURL = [dir URLByAppendingPathComponent:CDTISDBName];
 
     _persistentStoreCoordinator =
     [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
